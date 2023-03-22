@@ -134,8 +134,9 @@ initiallySaveAllGlobalModels(cwd, global_LSTM_models, global_CNN_models, global_
 print("Created and saved global models for each cluster")
 
 # Iterate through federated learning for number of training rounds
-#for idx_com, comm_round in enumerate(range(comms_round)):
-for idx_com, comm_round in enumerate(range(3,5)):
+# Only for testing
+# for idx_com, comm_round in enumerate(range(3,5)):
+for idx_com, comm_round in enumerate(range(comms_round)):
     
     # Clear terminal and print current training round
     IPython.display.clear_output()
