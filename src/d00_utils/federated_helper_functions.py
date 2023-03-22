@@ -16,7 +16,7 @@ import math
 #Keras: Open-Source deep-learning library 
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import backend as K
+from keras import backend as K
 
 from model_helper_functions import *
 from windowgenerator import *
@@ -205,34 +205,34 @@ def createGlobalModelsForClusters(
 
         #Build Models
         global_LSTM_models.append(LSTM_Model().build(
-            input_shape = INPUT_SHAPE[0], 
+            input_shape = INPUT_SHAPE, 
             num_LSTM_cells = NUM_LSTM_CELLS,
             num_LSTM_layers = NUM_LSTM_LAYERS,
             num_LSTM_dense_layers = NUM_LSTM_DENSE_LAYERS,
             num_LSTM_dense_units = NUM_LSTM_DENSE_UNITS,
             LSTM_dropout = LSTM_DROPOUT,
-            output_steps = OUT_STEPS[0],
-            num_features = NUM_FEATURES[0],
+            output_steps = OUT_STEPS,
+            num_features = NUM_FEATURES,
             model_name = LSTM_NAME
         ))
         #CNN        
         global_CNN_models.append(CNN_Model().build(
-            input_shape = INPUT_SHAPE[0], 
+            input_shape = INPUT_SHAPE, 
             conv_width = CONV_WIDTH,
             num_CNN_layers = NUM_CNN_LAYERS,
             num_CNN_filters = NUM_CNN_FILTERS,
             num_CNN_dense_layers = NUM_CNN_DENSE_LAYERS,
             num_CNN_dense_units = NUM_CNN_DENSE_UNITS,
             CNN_dropout = CNN_DROPOUT,
-            output_steps = OUT_STEPS[0],
-            num_features = NUM_FEATURES[0],
+            output_steps = OUT_STEPS,
+            num_features = NUM_FEATURES,
             model_name = CNN_NAME
         ))
         #Transformer
         global_Transformer_models.append(Transformer_Model().build(
-            input_shape = INPUT_SHAPE[0],
-            output_steps = OUT_STEPS[0],
-            num_features = NUM_FEATURES[0],
+            input_shape = INPUT_SHAPE,
+            output_steps = OUT_STEPS,
+            num_features = NUM_FEATURES,
             model_name = Tansformer_NAME    
         ))
          

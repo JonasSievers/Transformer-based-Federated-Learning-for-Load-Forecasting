@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
+
 
 #Imports
 
@@ -30,11 +31,11 @@ import tensorflow as tf
 # keras as open-source deep-learning library 
 from tensorflow import keras
 # building blocks of NN in Keras
-from keras import layers
+from tensorflow.keras import layers
 # earlyStop to stop training early
-from keras.callbacks import EarlyStopping
-from keras.optimizers import SGD
-from keras import backend as K
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.optimizers import SGD
+from tensorflow.keras import backend as K
 
 # IPython to Clear terminal output
 import IPython
@@ -52,25 +53,23 @@ import pickle
 # helper functions
 import sys
 # caution: path[0] is reserved for script path (or '' in REPL)
-cwd = os.path.normpath(os.getcwd())
-sys.path.insert(1, cwd + "/src/d00_utils/") 
-#Add path to utils folder to VS Code (Strg + ,) -> python.analysis.extraPaths -> add item
-# C:/Users/jonas/transformerBasedFederatedLearningForSecureSTLFInSG/src/d00_utils/
+cwd = os.path.normpath(os.getcwd() + os.sep + os.pardir + os.sep + os.pardir)
+sys.path.insert(1, cwd + "/src/d00_utils") 
 from federated_helper_functions import *
 from model_helper_functions import *
 from windowgenerator import *
 
 
 #Data Analytics
+
 print("Get data")
 # get current working directory and go back one folder to main working directory
-cwd = os.path.normpath(os.getcwd())
+cwd = os.path.normpath(os.getcwd() + os.sep + os.pardir + os.sep + os.pardir)
 #Read CSV file to pandas dataframe; encoding= 'unicode_escape': Decode from Latin-1 source code. Default UTF-8.
 df = pd.read_csv(cwd+'/data/d03_data_processed/d03_data_processed.csv', encoding= 'unicode_escape', index_col='Date')
 #Display smart meter names and amount
 smart_meter_names = df.columns[2:-4]
 print("Selected clients: ", len(smart_meter_names))
-
 
 #Get clustered clients
 N_CLUSTERS = 6
@@ -108,7 +107,6 @@ comms_round = 20
 #Training epochs
 MAX_EPOCHS = 2
 
-
 # Create Windows 
 windows_dict = createDataWindows(y, smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict, N_CLUSTERS)
 print("Created Data windows")
@@ -122,7 +120,7 @@ tf.random.set_seed(42)
 
 #Create Global models
 global_LSTM_models, global_CNN_models, global_Transformer_models = createGlobalModelsForClusters(
-        windows_dict, INPUT_SHAPE[0], OUT_STEPS[0], NUM_FEATURES[0], 'Federated_LSTM_F5_H12', 'Federated_CNN_F5_H12', 'Federated_Transformer_F5_H12',
+        windows_dict, INPUT_SHAPE[1], OUT_STEPS[1], NUM_FEATURES[1], 'Federated_LSTM_F7_H24', 'Federated_CNN_F7_H24', 'Federated_Transformer_F7_H24',
         NUM_LSTM_CELLS, NUM_LSTM_LAYERS, NUM_LSTM_DENSE_LAYERS, NUM_LSTM_DENSE_UNITS, LSTM_DROPOUT, 
         CONV_WIDTH, NUM_CNN_LAYERS, NUM_CNN_FILTERS, NUM_CNN_DENSE_LAYERS, NUM_CNN_DENSE_UNITS, CNN_DROPOUT, 
     )
@@ -165,13 +163,13 @@ for idx_com, comm_round in enumerate(range(comms_round)):
 
             #LSTM
             local_LSTM_model = LSTM_Model().build(
-                INPUT_SHAPE[0], NUM_LSTM_CELLS, NUM_LSTM_LAYERS, NUM_LSTM_DENSE_LAYERS, NUM_LSTM_DENSE_UNITS,
-                LSTM_DROPOUT, OUT_STEPS[0], NUM_FEATURES[0], 'Federated_local_LSTM_F5_H12'
+                INPUT_SHAPE[1], NUM_LSTM_CELLS, NUM_LSTM_LAYERS, NUM_LSTM_DENSE_LAYERS, NUM_LSTM_DENSE_UNITS,
+                LSTM_DROPOUT, OUT_STEPS[1], NUM_FEATURES[1], 'Federated_local_LSTM_F7_H24'
             )
             scaled_weights = compile_fit_set_weights(
                 local_LSTM_model, 
                 global_LSTM_weights, 
-                windows_dict[cluster][client][0], 
+                windows_dict[cluster][client][3], 
                 client, 
                 client_names, 
                 MAX_EPOCHS, 
@@ -182,13 +180,13 @@ for idx_com, comm_round in enumerate(range(comms_round)):
 
             #CNN
             local_CNN_model = CNN_Model().build(
-                INPUT_SHAPE[0], CONV_WIDTH, NUM_CNN_LAYERS, NUM_CNN_FILTERS, NUM_CNN_DENSE_LAYERS, NUM_CNN_DENSE_UNITS,
-                CNN_DROPOUT, OUT_STEPS[0], NUM_FEATURES[0],'Federated_local_CNN_F5_H24'
+                INPUT_SHAPE[1], CONV_WIDTH, NUM_CNN_LAYERS, NUM_CNN_FILTERS, NUM_CNN_DENSE_LAYERS, NUM_CNN_DENSE_UNITS,
+                CNN_DROPOUT, OUT_STEPS[1], NUM_FEATURES[1],'Federated_local_CNN_F7_H24'
             )    
             scaled_weights = compile_fit_set_weights(
                 local_CNN_model, 
                 global_CNN_weights, 
-                windows_dict[cluster][client][0], 
+                windows_dict[cluster][client][3], #F7H24
                 client, 
                 client_names, 
                 MAX_EPOCHS, 
@@ -198,12 +196,12 @@ for idx_com, comm_round in enumerate(range(comms_round)):
 
             #Transformer
             local_Transformer_model = Transformer_Model().build(
-                INPUT_SHAPE[0],OUT_STEPS[0],NUM_FEATURES[0],'Federated_local_Transformer_F5_H24'    
+                INPUT_SHAPE[1],OUT_STEPS[1],NUM_FEATURES[1],'Federated_local_Transformer_F7_H24'    
             )
             scaled_weights = compile_fit_set_weights(
                 local_Transformer_model, 
                 global_Transformer_weights, 
-                windows_dict[cluster][client][0], 
+                windows_dict[cluster][client][3], 
                 client, 
                 client_names, 
                 MAX_EPOCHS, 
