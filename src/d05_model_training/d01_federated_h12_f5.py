@@ -113,8 +113,9 @@ MAX_EPOCHS = 2
 windows_dict = createDataWindows(y, smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict, N_CLUSTERS)
 print("Created Data windows")
 
-windows_dict = {k: v for k, v in windows_dict.items() if k == 4}
-print(windows_dict)
+#Select smallest cluster only for testing
+#windows_dict = {k: v for k, v in windows_dict.items() if k == 4}
+#print(windows_dict)
 
 # Federated Learning
 # Set random seed for as reproducible results as possible
