@@ -1,0 +1,357 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+# Imports
+
+#Pandas: Reading and analyzing data
+import pandas as pd
+#Numerical calcuations
+import numpy as np
+#Evaluate models
+import math
+
+#Keras: Open-Source deep-learning library 
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import backend as K
+
+from model_helper_functions import *
+from windowgenerator import *
+
+def weight_scalling_factor(clients_trn_data, client_name, client_names):
+    """
+    weight_scalling_factor calculates the proportion of a client’s local training data 
+    with the overall training data held by all clients. First the client’s batch size is obtained and used 
+    to calculate its number of data points.Then the overall global training data size is obtained (global_count).
+    Finally we calculated the scaling factor as a fraction (return). 
+    """
+    #get the bs
+    bs = list(clients_trn_data)[0][0].shape[0]
+    #first calculate the total training data points across clinets
+    global_count = sum([tf.data.experimental.cardinality(clients_trn_data).numpy() for client_name in client_names])*bs
+    # get the total number of data points held by a client
+    local_count = tf.data.experimental.cardinality(clients_trn_data).numpy()*bs
+    return local_count/global_count
+
+def scale_model_weights(weight, scalar):
+    """
+    scale_model_weights scales each of the local model’s weights based the value of their scaling factor calculated in weight_scalling_factor
+    """
+    weight_final = []
+    steps = len(weight)
+    for i in range(steps):
+        weight_final.append(scalar * weight[i])
+    return weight_final
+
+def sum_scaled_weights(scaled_weight_list):
+    """
+    Return the sum of the listed scaled weights. The is equivalent to scaled avg of the weights
+    """
+    avg_grad = list()
+    #get the average grad accross all client gradients
+    for grad_list_tuple in zip(*scaled_weight_list):
+        layer_mean = tf.math.reduce_sum(grad_list_tuple, axis=0)
+        avg_grad.append(layer_mean)
+        
+    return avg_grad
+
+def createDataWindows(y, smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict, N_CLUSTERS): 
+    """
+    Create a window for every client considering each horizon (12, 24) and each featureset (5,7)
+    
+    :param smart_meter_names: names of clients
+    :return: dictionary with structure windows_dict[0-nr_clusters][client_i_smart_meter_names][0-3] 
+        -> 0:window_F5_H12 , 1:window_F5_H24 , 2:window_F7_H12 , 3:window_F7_H24
+    """
+    
+    windows_dict = {k: {} for k in range(N_CLUSTERS)}
+    
+    for i, client in enumerate(smart_meter_names):
+        
+        #window_F5_H12
+        window_F5_H12 = WindowGenerator(
+            input_width=INPUT_STEPS, label_width=OUT_STEPS[0], shift=OUT_STEPS[0], 
+            train_df = ds_dict[client][3], val_df = ds_dict[client][4], test_df = ds_dict[client][5], label_columns=[client]
+        )
+        example_window = tf.stack([np.array(ds_dict[client][3][10100:10100+window_F5_H12.total_window_size]),
+                                   np.array(ds_dict[client][3][2000:2000+window_F5_H12.total_window_size]),
+                                   np.array(ds_dict[client][3][3000:3000+window_F5_H12.total_window_size])])
+        example_inputs, example_labels = window_F5_H12.split_window(example_window)
+        window_F5_H12.example = example_inputs, example_labels
+
+        #window_F5_H24
+        window_F5_H24 = WindowGenerator(
+            input_width=INPUT_STEPS, label_width=OUT_STEPS[1], shift=OUT_STEPS[1], 
+            train_df = ds_dict[client][3], val_df = ds_dict[client][4], test_df = ds_dict[client][5], label_columns=[client]
+        )
+        example_window = tf.stack([np.array(ds_dict[client][3][10100:10100+window_F5_H24.total_window_size]),
+                                   np.array(ds_dict[client][3][2000:2000+window_F5_H24.total_window_size]),
+                                   np.array(ds_dict[client][3][3000:3000+window_F5_H24.total_window_size])])
+        example_inputs, example_labels = window_F5_H24.split_window(example_window)
+        window_F5_H24.example = example_inputs, example_labels
+
+        #window_F7_H12
+        window_F7_H12 = WindowGenerator(
+            input_width=INPUT_STEPS, label_width=OUT_STEPS[0], shift=OUT_STEPS[0], 
+            train_df = ds_dict[client][0], val_df = ds_dict[client][1], test_df = ds_dict[client][2], label_columns=[client]
+        )
+        example_window = tf.stack([np.array(ds_dict[client][0][10100:10100+window_F7_H12.total_window_size]),
+                                   np.array(ds_dict[client][0][2000:2000+window_F7_H12.total_window_size]),
+                                   np.array(ds_dict[client][0][3000:3000+window_F7_H12.total_window_size])])
+        example_inputs, example_labels = window_F7_H12.split_window(example_window)
+        window_F7_H12.example = example_inputs, example_labels
+
+        #window_F5_H24
+        window_F7_H24 = WindowGenerator(
+            input_width=INPUT_STEPS, label_width=OUT_STEPS[1], shift=OUT_STEPS[1], 
+            train_df = ds_dict[client][0], val_df = ds_dict[client][1], test_df = ds_dict[client][2], label_columns=[client]
+        )
+        example_window = tf.stack([np.array(ds_dict[client][0][10100:10100+window_F7_H24.total_window_size]),
+                                   np.array(ds_dict[client][0][2000:2000+window_F7_H24.total_window_size]),
+                                   np.array(ds_dict[client][0][3000:3000+window_F7_H24.total_window_size])])
+        example_inputs, example_labels = window_F7_H24.split_window(example_window)
+        window_F7_H24.example = example_inputs, example_labels
+
+        windows_dict[y[i]]['{}_{}_{}'.format('client', i+1, client)] = [window_F5_H12, window_F5_H24, window_F7_H12, window_F7_H24]
+    
+    return windows_dict
+
+def makeDatasetsForclientsAndfeatures(smart_meter_names, df):
+    """
+    Create datasets (train, val, test) for every client considering each featureset (5,7)
+    
+    :param smart_meter_names: names of clients
+    :param df: dataframe
+    :return: dictionary with structure ds_dict[smart_meter_names][0-5] 
+       -> 0:train_df_F7, 1: val_df_F7, 2: test_df_F7, 3: train_df_F5, 4: val_df_F5, 5: test_df_F5
+    
+    """
+    ds_dict = {}
+    n = len(df)
+    for client in smart_meter_names:   
+        train_df_F7 = df[0:int(n*0.7)][[client, 'temp', 'rhum', 'hour sin', 'hour cos', 'dayofweek sin', 'dayofweek cos']]
+        val_df_F7 = df[int(n*0.7):int(n*0.9)][[client, 'temp', 'rhum', 'hour sin', 'hour cos', 'dayofweek sin', 'dayofweek cos']]
+        test_df_F7 = df[int(n*0.9):][[client, 'temp', 'rhum', 'hour sin', 'hour cos', 'dayofweek sin', 'dayofweek cos']]
+
+        train_df_F5 = df[0:int(n*0.7)][[client, 'hour sin', 'hour cos', 'dayofweek sin', 'dayofweek cos']]
+        val_df_F5 = df[int(n*0.7):int(n*0.9)][[client, 'hour sin', 'hour cos', 'dayofweek sin', 'dayofweek cos']]
+        test_df_F5 = df[int(n*0.9):][[client, 'hour sin', 'hour cos', 'dayofweek sin', 'dayofweek cos']]
+
+        ds_dict[client] = [train_df_F7, val_df_F7, test_df_F7, train_df_F5, val_df_F5, test_df_F5]
+    
+    return ds_dict
+
+def InititalizeResultDictionary(learning_style="Federated"):
+    """
+    Iniitalize dictionary to save training results
+    
+    :param learning_style: style of learning - federated, centralized, local
+    :return: dictionary with structure ds_dict[learning_style][model][horizon][features]     
+    """
+    #Initialize results
+    final_dict = {}
+    final_dict[learning_style] = {}
+    final_dict[learning_style]['LSTM'] = {}
+    final_dict[learning_style]['LSTM']['H12'] = {}
+    final_dict[learning_style]['LSTM']['H12']['F5'] = {}
+    final_dict[learning_style]['LSTM']['H12']['F7'] = {}
+    #----------------------------------------------
+    final_dict[learning_style]['LSTM']['H24'] = {}
+    final_dict[learning_style]['LSTM']['H24']['F5'] = {}
+    final_dict[learning_style]['LSTM']['H24']['F7'] = {}
+
+    final_dict[learning_style]['CNN'] = {}
+    final_dict[learning_style]['CNN']['H12'] = {}
+    final_dict[learning_style]['CNN']['H12']['F5'] = {}
+    final_dict[learning_style]['CNN']['H12']['F7'] = {}
+    #----------------------------------------------
+    final_dict[learning_style]['CNN']['H24'] = {}
+    final_dict[learning_style]['CNN']['H24']['F5'] = {}
+    final_dict[learning_style]['CNN']['H24']['F7'] = {}
+
+    final_dict[learning_style]['Transformer'] = {}
+    final_dict[learning_style]['Transformer']['H12'] = {}
+    final_dict[learning_style]['Transformer']['H12']['F5'] = {}
+    final_dict[learning_style]['Transformer']['H12']['F7'] = {}
+    #----------------------------------------------
+    final_dict[learning_style]['Transformer']['H24'] = {}
+    final_dict[learning_style]['Transformer']['H24']['F5'] = {}
+    final_dict[learning_style]['Transformer']['H24']['F7'] = {}
+    
+    return final_dict
+    
+    
+def createGlobalModelsForClusters(
+        windows_dict, INPUT_SHAPE, OUT_STEPS, NUM_FEATURES, LSTM_NAME, CNN_NAME, Tansformer_NAME, 
+        NUM_LSTM_CELLS, NUM_LSTM_LAYERS, NUM_LSTM_DENSE_LAYERS, NUM_LSTM_DENSE_UNITS, LSTM_DROPOUT, 
+        CONV_WIDTH, NUM_CNN_LAYERS, NUM_CNN_FILTERS, NUM_CNN_DENSE_LAYERS, NUM_CNN_DENSE_UNITS, CNN_DROPOUT, 
+    ):
+    """
+    Create a global LSTM, CNN, and Transofrmer model for each of the clusters
+    
+    :param: architecture parameters of the models
+    :return: 3 arrays with number of clusters LSTM, CNN, and Transofrmer models
+    """
+    
+    ### Features 5, Horizon 12
+    global_LSTM_models = []
+    global_CNN_models = []
+    global_Transformer_models = []
+
+    for idx, cluster in enumerate(windows_dict):
+
+        #Build Models
+        global_LSTM_models.append(LSTM_Model().build(
+            input_shape = INPUT_SHAPE[0], 
+            num_LSTM_cells = NUM_LSTM_CELLS,
+            num_LSTM_layers = NUM_LSTM_LAYERS,
+            num_LSTM_dense_layers = NUM_LSTM_DENSE_LAYERS,
+            num_LSTM_dense_units = NUM_LSTM_DENSE_UNITS,
+            LSTM_dropout = LSTM_DROPOUT,
+            output_steps = OUT_STEPS[0],
+            num_features = NUM_FEATURES[0],
+            model_name = LSTM_NAME
+        ))
+        #CNN        
+        global_CNN_models.append(CNN_Model().build(
+            input_shape = INPUT_SHAPE[0], 
+            conv_width = CONV_WIDTH,
+            num_CNN_layers = NUM_CNN_LAYERS,
+            num_CNN_filters = NUM_CNN_FILTERS,
+            num_CNN_dense_layers = NUM_CNN_DENSE_LAYERS,
+            num_CNN_dense_units = NUM_CNN_DENSE_UNITS,
+            CNN_dropout = CNN_DROPOUT,
+            output_steps = OUT_STEPS[0],
+            num_features = NUM_FEATURES[0],
+            model_name = CNN_NAME
+        ))
+        #Transformer
+        global_Transformer_models.append(Transformer_Model().build(
+            input_shape = INPUT_SHAPE[0],
+            output_steps = OUT_STEPS[0],
+            num_features = NUM_FEATURES[0],
+            model_name = Tansformer_NAME    
+        ))
+         
+    return global_LSTM_models, global_CNN_models, global_Transformer_models
+    
+    
+def getClientNamesOfCluster(windows_dict, cluster):
+    """
+    Get a list of all clients within the current cluster 
+    
+    :param windows_dict: dictionary with data windos sorted by cluster
+    :return: list of client names within current cluster
+    """
+    
+    #Get names of clients within cluster
+    client_names = list()
+    for client in windows_dict[cluster]:
+        client_names.append(client)
+        
+    return client_names
+
+
+def compile_fit_set_weights(local_model, global_weights, window, client, client_names, MAX_EPOCHS):
+    """
+    Takes a model, compiles it, sets global weights, fits the model and retunrs new weights
+    
+    :param: model, global weights, the window to train and validate with
+    :return: array of sclaed weights
+    """
+    #Compile Model (define loss, optimizer, metrics)
+    local_model.compile(
+        loss=tf.keras.losses.MeanSquaredError(),
+        optimizer=tf.keras.optimizers.Adam(),
+        metrics=[tf.keras.metrics.RootMeanSquaredError(), 
+            tf.keras.metrics.MeanAbsolutePercentageError(),
+            tf.keras.metrics.MeanAbsoluteError(),
+        ]
+    )
+    
+    #set local model weight to the weight of the global model
+    local_model.set_weights(global_weights)
+    
+    #fit local model with client's data
+    early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss',patience=2,mode='min')
+    local_model.fit(
+        window.train, 
+        epochs=MAX_EPOCHS, 
+        verbose=1, 
+        validation_data=window.val,
+        callbacks=[
+            timetaken,
+            #early_stopping, 
+            #create_model_checkpoint(save_path=save_path), 
+        ]
+    )
+    
+    #scale the model weights and add to list        
+    scaling_factor = weight_scalling_factor(window.train, client, client_names)
+    scaled_weights = scale_model_weights(local_model.get_weights(), scaling_factor)
+    
+    return scaled_weights
+    
+
+def loadGlobalModels( cwd, global_LSTM_models, global_CNN_models, global_Transformer_models, idx, idx_com):
+    """
+    load the global model of the last federated training round. If called in federated round 0, then the initial global model is retuned
+    
+    :param: path, global models, cluster index, index of federated round
+    :return: global models
+    """
+        
+    #load global model of last federated round if not first round
+    if idx_com != 0:
+        idx_com = idx_com-1
+        
+    #load model
+    global_LSTM_model = keras.models.load_model(cwd + f"/data/d05_models/cluster{idx}/{global_LSTM_models[idx].name}/FederatedRound{idx_com}", compile=False)
+    global_CNN_model = keras.models.load_model(cwd + f"/data/d05_models/cluster{idx}/{global_CNN_models[idx].name}/FederatedRound{idx_com}", compile=False)
+    global_Transformer_model = keras.models.load_model(cwd + f"/data/d05_models/cluster{idx}/{global_Transformer_models[idx].name}/FederatedRound{idx_com}", compile=False)
+    
+    return global_LSTM_model, global_CNN_model, global_Transformer_model
+    
+def getGlobalModelWeights(global_LSTM_model, global_CNN_model, global_Transformer_model):
+    """
+    retunrs the weights of the gobal models
+    """      
+    #Get model weights
+    global_LSTM_weights = global_LSTM_model.get_weights()
+    global_CNN_weights = global_CNN_model.get_weights()
+    global_Transformer_weights = global_Transformer_model.get_weights()
+                                                       
+    return global_LSTM_weights, global_CNN_weights, global_Transformer_weights
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------Change clusters
+def initiallySaveAllGlobalModels(cwd, global_LSTM_models, global_CNN_models, global_Transformer_models):
+    """
+    Saves the initial global models in file /data/d05_models/cluser{i}/MODELNAME/FederatedRound{i}
+    
+    :param: current working directory,  models
+    """
+        
+    for cluster_idx in range(6):
+        # LSTM
+        global_LSTM_models[cluster_idx].save(cwd + f"/data/d05_models/cluster{cluster_idx}/{global_LSTM_models[cluster_idx].name}/FederatedRound{0}")
+        #Cnn
+        global_CNN_models[cluster_idx].save(cwd + f"/data/d05_models/cluster{cluster_idx}/{global_CNN_models[cluster_idx].name}/FederatedRound{0}")
+        #Transformer
+        global_Transformer_models[cluster_idx].save(cwd + f"/data/d05_models/cluster{cluster_idx}/{global_Transformer_models[cluster_idx].name}/FederatedRound{0}")
+
+def saveGlobalModels(cwd, global_LSTM_model, global_CNN_model, global_Transformer_model, idx, idx_com):
+    """
+    Save the global models  
+    
+    :param: global models, cluster idx und federated round idx
+    """
+    # LSTM
+    global_LSTM_model.save(cwd + f"/data/d05_models/cluster{idx}/{global_LSTM_model.name}/FederatedRound{idx_com}")
+    #Cnn
+    global_CNN_model.save(cwd + f"/data/d05_models/cluster{idx}/{global_CNN_model.name}/FederatedRound{idx_com}")
+    #Transformer
+    global_Transformer_model.save(cwd + f"/data/d05_models/cluster{idx}/{global_Transformer_model.name}/FederatedRound{idx_com}")
+
