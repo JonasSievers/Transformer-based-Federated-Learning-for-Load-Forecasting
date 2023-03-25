@@ -20,8 +20,6 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 # matplotlib to plot numpy array
 import matplotlib.pyplot as plt
-#tslearn for K-Means Clustering
-from tslearn.clustering import TimeSeriesKMeans
 # os to find path of files 
 import os
 
