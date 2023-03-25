@@ -15,9 +15,6 @@ import seaborn as sns
 import datetime
 # math to calculate model evaluation steps
 import math
-# sklearn for minMaxSclaing and mse
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error
 # matplotlib to plot numpy array
 import matplotlib.pyplot as plt
 # os to find path of files 
@@ -29,23 +26,16 @@ import tensorflow as tf
 from tensorflow import keras
 # building blocks of NN in Keras
 from keras import layers
-# earlyStop to stop training early
-from keras.callbacks import EarlyStopping
-from keras.optimizers import SGD
 from keras import backend as K
 
 # IPython to Clear terminal output
 import IPython
 import IPython.display
 # time and timeit to provie a callback to logg model fitting time
-import time
 from timeit import default_timer as timer
 # logging to logg debug, errors, info, warning, error information
 import logging
 logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
-
-# pickle to save dictionary in file
-import pickle 
 
 # helper functions
 import sys

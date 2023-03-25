@@ -19,9 +19,9 @@ import tensorflow as tf
 #Keras: Open-Source deep-learning library 
 from tensorflow import keras
 #Building blocks of NN in Keras
-from tensorflow.keras import layers
+from keras import layers
 #EarlyStop to stop training early
-from tensorflow.keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping
 #Functional API: Layers for different models
 from keras.layers import Dense, LSTM, Dropout
 #Normalization
@@ -46,6 +46,7 @@ import IPython.display
 from sklearn.preprocessing import MinMaxScaler
 #Standardization
 from sklearn.preprocessing import StandardScaler
+from windowgenerator import *
 
 
 # Create a function to implement a ModelCheckpoint callback with a specific filename 
@@ -206,4 +207,129 @@ def test_model(window, model, client_name, MAX_EPOCHS):
     model_evaluation_test = model.evaluate(window.test)
    
     return model_evaluation_test
+
+def createDataWindows(y, smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict, N_CLUSTERS): 
+    """
+    Create a window for every client considering each horizon (12, 24) and each featureset (5,7)
+    
+    :param smart_meter_names: names of clients
+    :return: dictionary with structure windows_dict[0-nr_clusters][client_i_smart_meter_names][0-3] 
+        -> 0:window_F5_H12 , 1:window_F5_H24 , 2:window_F7_H12 , 3:window_F7_H24
+    """
+    
+    windows_dict = {k: {} for k in range(N_CLUSTERS)}
+    
+    for i, client in enumerate(smart_meter_names):
+        
+        #window_F5_H12
+        window_F5_H12 = WindowGenerator(
+            input_width=INPUT_STEPS, label_width=OUT_STEPS[0], shift=OUT_STEPS[0], 
+            train_df = ds_dict[client][3], val_df = ds_dict[client][4], test_df = ds_dict[client][5], label_columns=[client]
+        )
+        example_window = tf.stack([np.array(ds_dict[client][3][10100:10100+window_F5_H12.total_window_size]),
+                                   np.array(ds_dict[client][3][2000:2000+window_F5_H12.total_window_size]),
+                                   np.array(ds_dict[client][3][3000:3000+window_F5_H12.total_window_size])])
+        example_inputs, example_labels = window_F5_H12.split_window(example_window)
+        window_F5_H12.example = example_inputs, example_labels
+
+        #window_F5_H24
+        window_F5_H24 = WindowGenerator(
+            input_width=INPUT_STEPS, label_width=OUT_STEPS[1], shift=OUT_STEPS[1], 
+            train_df = ds_dict[client][3], val_df = ds_dict[client][4], test_df = ds_dict[client][5], label_columns=[client]
+        )
+        example_window = tf.stack([np.array(ds_dict[client][3][10100:10100+window_F5_H24.total_window_size]),
+                                   np.array(ds_dict[client][3][2000:2000+window_F5_H24.total_window_size]),
+                                   np.array(ds_dict[client][3][3000:3000+window_F5_H24.total_window_size])])
+        example_inputs, example_labels = window_F5_H24.split_window(example_window)
+        window_F5_H24.example = example_inputs, example_labels
+
+        #window_F7_H12
+        window_F7_H12 = WindowGenerator(
+            input_width=INPUT_STEPS, label_width=OUT_STEPS[0], shift=OUT_STEPS[0], 
+            train_df = ds_dict[client][0], val_df = ds_dict[client][1], test_df = ds_dict[client][2], label_columns=[client]
+        )
+        example_window = tf.stack([np.array(ds_dict[client][0][10100:10100+window_F7_H12.total_window_size]),
+                                   np.array(ds_dict[client][0][2000:2000+window_F7_H12.total_window_size]),
+                                   np.array(ds_dict[client][0][3000:3000+window_F7_H12.total_window_size])])
+        example_inputs, example_labels = window_F7_H12.split_window(example_window)
+        window_F7_H12.example = example_inputs, example_labels
+
+        #window_F5_H24
+        window_F7_H24 = WindowGenerator(
+            input_width=INPUT_STEPS, label_width=OUT_STEPS[1], shift=OUT_STEPS[1], 
+            train_df = ds_dict[client][0], val_df = ds_dict[client][1], test_df = ds_dict[client][2], label_columns=[client]
+        )
+        example_window = tf.stack([np.array(ds_dict[client][0][10100:10100+window_F7_H24.total_window_size]),
+                                   np.array(ds_dict[client][0][2000:2000+window_F7_H24.total_window_size]),
+                                   np.array(ds_dict[client][0][3000:3000+window_F7_H24.total_window_size])])
+        example_inputs, example_labels = window_F7_H24.split_window(example_window)
+        window_F7_H24.example = example_inputs, example_labels
+
+        windows_dict[y[i]]['{}_{}_{}'.format('client', i+1, client)] = [window_F5_H12, window_F5_H24, window_F7_H12, window_F7_H24]
+    
+    return windows_dict
+
+def makeDatasetsForclientsAndfeatures(smart_meter_names, df):
+    """
+    Create datasets (train, val, test) for every client considering each featureset (5,7)
+    
+    :param smart_meter_names: names of clients
+    :param df: dataframe
+    :return: dictionary with structure ds_dict[smart_meter_names][0-5] 
+       -> 0:train_df_F7, 1: val_df_F7, 2: test_df_F7, 3: train_df_F5, 4: val_df_F5, 5: test_df_F5
+    
+    """
+    ds_dict = {}
+    n = len(df)
+    for client in smart_meter_names:   
+        train_df_F7 = df[0:int(n*0.7)][[client, 'temp', 'rhum', 'hour sin', 'hour cos', 'dayofweek sin', 'dayofweek cos']]
+        val_df_F7 = df[int(n*0.7):int(n*0.9)][[client, 'temp', 'rhum', 'hour sin', 'hour cos', 'dayofweek sin', 'dayofweek cos']]
+        test_df_F7 = df[int(n*0.9):][[client, 'temp', 'rhum', 'hour sin', 'hour cos', 'dayofweek sin', 'dayofweek cos']]
+
+        train_df_F5 = df[0:int(n*0.7)][[client, 'hour sin', 'hour cos', 'dayofweek sin', 'dayofweek cos']]
+        val_df_F5 = df[int(n*0.7):int(n*0.9)][[client, 'hour sin', 'hour cos', 'dayofweek sin', 'dayofweek cos']]
+        test_df_F5 = df[int(n*0.9):][[client, 'hour sin', 'hour cos', 'dayofweek sin', 'dayofweek cos']]
+
+        ds_dict[client] = [train_df_F7, val_df_F7, test_df_F7, train_df_F5, val_df_F5, test_df_F5]
+    
+    return ds_dict
+
+def InititalizeResultDictionary(learning_style="Federated"):
+    """
+    Iniitalize dictionary to save training results
+    
+    :param learning_style: style of learning - federated, centralized, local
+    :return: dictionary with structure ds_dict[learning_style][model][horizon][features]     
+    """
+    #Initialize results
+    final_dict = {}
+    final_dict[learning_style] = {}
+    final_dict[learning_style]['LSTM'] = {}
+    final_dict[learning_style]['LSTM']['H12'] = {}
+    final_dict[learning_style]['LSTM']['H12']['F5'] = {}
+    final_dict[learning_style]['LSTM']['H12']['F7'] = {}
+    #----------------------------------------------
+    final_dict[learning_style]['LSTM']['H24'] = {}
+    final_dict[learning_style]['LSTM']['H24']['F5'] = {}
+    final_dict[learning_style]['LSTM']['H24']['F7'] = {}
+
+    final_dict[learning_style]['CNN'] = {}
+    final_dict[learning_style]['CNN']['H12'] = {}
+    final_dict[learning_style]['CNN']['H12']['F5'] = {}
+    final_dict[learning_style]['CNN']['H12']['F7'] = {}
+    #----------------------------------------------
+    final_dict[learning_style]['CNN']['H24'] = {}
+    final_dict[learning_style]['CNN']['H24']['F5'] = {}
+    final_dict[learning_style]['CNN']['H24']['F7'] = {}
+
+    final_dict[learning_style]['Transformer'] = {}
+    final_dict[learning_style]['Transformer']['H12'] = {}
+    final_dict[learning_style]['Transformer']['H12']['F5'] = {}
+    final_dict[learning_style]['Transformer']['H12']['F7'] = {}
+    #----------------------------------------------
+    final_dict[learning_style]['Transformer']['H24'] = {}
+    final_dict[learning_style]['Transformer']['H24']['F5'] = {}
+    final_dict[learning_style]['Transformer']['H24']['F7'] = {}
+    
+    return final_dict
 
