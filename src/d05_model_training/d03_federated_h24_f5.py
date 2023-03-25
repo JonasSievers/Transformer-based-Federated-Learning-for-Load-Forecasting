@@ -31,29 +31,23 @@ import tensorflow as tf
 # keras as open-source deep-learning library 
 from tensorflow import keras
 # building blocks of NN in Keras
-from tensorflow.keras import layers
+from keras import layers
 # earlyStop to stop training early
-from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.keras.optimizers import SGD
-from tensorflow.keras import backend as K
+from keras import backend as K
 
 # IPython to Clear terminal output
 import IPython
 import IPython.display
 # time and timeit to provie a callback to logg model fitting time
-import time
 from timeit import default_timer as timer
 # logging to logg debug, errors, info, warning, error information
 import logging
 logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.DEBUG)
 
-# pickle to save dictionary in file
-import pickle 
-
 # helper functions
 import sys
 # caution: path[0] is reserved for script path (or '' in REPL)
-cwd = os.path.normpath(os.getcwd() + os.sep + os.pardir + os.sep + os.pardir)
+cwd = os.path.normpath(os.getcwd())
 sys.path.insert(1, cwd + "/src/d00_utils") 
 from federated_helper_functions import *
 from model_helper_functions import *
@@ -63,8 +57,6 @@ from windowgenerator import *
 #Data Analytics
 
 print("Get data")
-# get current working directory and go back one folder to main working directory
-cwd = os.path.normpath(os.getcwd() + os.sep + os.pardir + os.sep + os.pardir)
 #Read CSV file to pandas dataframe; encoding= 'unicode_escape': Decode from Latin-1 source code. Default UTF-8.
 df = pd.read_csv(cwd+'/data/d03_data_processed/d03_data_processed.csv', encoding= 'unicode_escape', index_col='Date')
 #Display smart meter names and amount
@@ -111,8 +103,9 @@ MAX_EPOCHS = 2
 windows_dict = createDataWindows(y, smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict, N_CLUSTERS)
 print("Created Data windows")
 
-windows_dict = {k: v for k, v in windows_dict.items() if k == 4}
-print(windows_dict)
+#Select smallest cluster only for testing
+#windows_dict = {k: v for k, v in windows_dict.items() if k == 4}
+#print(windows_dict)
 
 # Federated Learning
 # Set random seed for as reproducible results as possible
