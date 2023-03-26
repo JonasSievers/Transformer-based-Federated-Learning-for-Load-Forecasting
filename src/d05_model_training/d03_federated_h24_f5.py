@@ -21,8 +21,6 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 # matplotlib to plot numpy array
 import matplotlib.pyplot as plt
-#tslearn for K-Means Clustering
-from tslearn.clustering import TimeSeriesKMeans
 # os to find path of files 
 import os
 
@@ -49,6 +47,8 @@ import sys
 # caution: path[0] is reserved for script path (or '' in REPL)
 cwd = os.path.normpath(os.getcwd())
 sys.path.insert(1, cwd + "/src/d00_utils") 
+#Add path to utils folder to VS Code (Strg + ,) -> python.analysis.extraPaths -> add item
+# C:/Users/jonas/transformerBasedFederatedLearningForSecureSTLFInSG/src/d00_utils/
 from federated_helper_functions import *
 from model_helper_functions import *
 from windowgenerator import *
@@ -103,9 +103,9 @@ MAX_EPOCHS = 2
 windows_dict = createDataWindows(y, smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict, N_CLUSTERS)
 print("Created Data windows")
 
-#Select smallest cluster only for testing
-#windows_dict = {k: v for k, v in windows_dict.items() if k == 4}
-#print(windows_dict)
+# Only for testing - select only 1 cluster with the least clients
+# windows_dict = {k: v for k, v in windows_dict.items() if k == 4}
+# print(windows_dict)
 
 # Federated Learning
 # Set random seed for as reproducible results as possible
