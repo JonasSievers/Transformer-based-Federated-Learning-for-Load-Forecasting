@@ -69,15 +69,15 @@ tf.random.set_seed(42)
 #h12 f7
 
 #Build and save local models
-for idx, client in enumerate(smart_meter_names):
-    #Build local models (LSTM, CNN, Transformer)
-    local_LSTM_models, local_CNN_models, local_Transformer_models = createLocalModels(
-        smart_meter_names, INPUT_SHAPE[1], OUT_STEPS[0], NUM_FEATURES[1], 'Local_LSTM_F7_H12', 'Local_CNN_F7_H12', 'Local_Transformer_F7_H12',
-        NUM_LSTM_CELLS, NUM_LSTM_LAYERS, NUM_LSTM_DENSE_LAYERS, NUM_LSTM_DENSE_UNITS, LSTM_DROPOUT, 
-        CONV_WIDTH, NUM_CNN_LAYERS, NUM_CNN_FILTERS, NUM_CNN_DENSE_LAYERS, NUM_CNN_DENSE_UNITS, CNN_DROPOUT, 
-    )
-    #initilally save local models
-    initiallySaveAllLocalModels(cwd, smart_meter_names, local_LSTM_models, local_CNN_models, local_Transformer_models)
+
+#Build local models (LSTM, CNN, Transformer)
+local_LSTM_models, local_CNN_models, local_Transformer_models = createLocalModels(
+    smart_meter_names, INPUT_SHAPE[1], OUT_STEPS[0], NUM_FEATURES[1], 'Local_LSTM_F7_H12', 'Local_CNN_F7_H12', 'Local_Transformer_F7_H12',
+    NUM_LSTM_CELLS, NUM_LSTM_LAYERS, NUM_LSTM_DENSE_LAYERS, NUM_LSTM_DENSE_UNITS, LSTM_DROPOUT, 
+    CONV_WIDTH, NUM_CNN_LAYERS, NUM_CNN_FILTERS, NUM_CNN_DENSE_LAYERS, NUM_CNN_DENSE_UNITS, CNN_DROPOUT, 
+)
+#initilally save local models
+initiallySaveAllLocalModels(cwd, smart_meter_names, local_LSTM_models, local_CNN_models, local_Transformer_models)
 print("Saved local models for h12 f7") 
 
 
@@ -124,15 +124,15 @@ for idx, client in enumerate(smart_meter_names):
 #h24 f7
 
 #Build and save local models
-for idx, client in enumerate(smart_meter_names):
-    #Build local models (LSTM, CNN, Transformer)
-    local_LSTM_models, local_CNN_models, local_Transformer_models = createLocalModels(
-        smart_meter_names, INPUT_SHAPE[1], OUT_STEPS[1], NUM_FEATURES[1], 'Local_LSTM_F7_H24', 'Local_CNN_F7_H24', 'Local_Transformer_F7_H24',
-        NUM_LSTM_CELLS, NUM_LSTM_LAYERS, NUM_LSTM_DENSE_LAYERS, NUM_LSTM_DENSE_UNITS, LSTM_DROPOUT, 
-        CONV_WIDTH, NUM_CNN_LAYERS, NUM_CNN_FILTERS, NUM_CNN_DENSE_LAYERS, NUM_CNN_DENSE_UNITS, CNN_DROPOUT, 
-    )
-    #initilally save local models
-    initiallySaveAllLocalModels(cwd, smart_meter_names, local_LSTM_models, local_CNN_models, local_Transformer_models)
+
+#Build local models (LSTM, CNN, Transformer)
+local_LSTM_models, local_CNN_models, local_Transformer_models = createLocalModels(
+    smart_meter_names, INPUT_SHAPE[1], OUT_STEPS[1], NUM_FEATURES[1], 'Local_LSTM_F7_H24', 'Local_CNN_F7_H24', 'Local_Transformer_F7_H24',
+    NUM_LSTM_CELLS, NUM_LSTM_LAYERS, NUM_LSTM_DENSE_LAYERS, NUM_LSTM_DENSE_UNITS, LSTM_DROPOUT, 
+    CONV_WIDTH, NUM_CNN_LAYERS, NUM_CNN_FILTERS, NUM_CNN_DENSE_LAYERS, NUM_CNN_DENSE_UNITS, CNN_DROPOUT, 
+)
+#initilally save local models
+initiallySaveAllLocalModels(cwd, smart_meter_names, local_LSTM_models, local_CNN_models, local_Transformer_models)
   
 
 
