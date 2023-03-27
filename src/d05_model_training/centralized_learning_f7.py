@@ -116,7 +116,7 @@ central_LSTM_model, central_CNN_model, central_Transformer_model = createCentral
 )
 #initilally save local models
 initiallySaveAllCentralModels(cwd, central_LSTM_model, central_CNN_model, central_Transformer_model)
-print("Saved central models for h12 f5")
+print("Saved central models for h12 f7")
 
 #Get central models
 central_LSTM_model, central_CNN_model, central_Transformer_model = loadCentralModels( 
@@ -167,7 +167,7 @@ central_LSTM_model, central_CNN_model, central_Transformer_model = createCentral
 )
 #initilally save local models
 initiallySaveAllCentralModels(cwd, central_LSTM_model, central_CNN_model, central_Transformer_model)
-print("Saved central models for h24 f5")
+print("Saved central models for h24 f7")
 
 #Get central models
 central_LSTM_model, central_CNN_model, central_Transformer_model = loadCentralModels( 
