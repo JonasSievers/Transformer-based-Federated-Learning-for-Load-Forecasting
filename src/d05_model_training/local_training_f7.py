@@ -103,7 +103,7 @@ for idx, client in enumerate(smart_meter_names):
 
     #compile and fit n rounds
     local_CNN_model = compile_fit(
-        local_LSTM_model,
+        local_CNN_model,
         windows_dict[client][2],
         MAX_EPOCHS
     )
@@ -111,7 +111,7 @@ for idx, client in enumerate(smart_meter_names):
 
     #Compile and fit n rounds
     local_Transformer_model = compile_fit(
-        local_LSTM_model,
+        local_Transformer_model,
         windows_dict[client][2],
         MAX_EPOCHS
     )
@@ -119,7 +119,9 @@ for idx, client in enumerate(smart_meter_names):
     
     #Save Transformer model
     saveLocalModels(cwd, local_LSTM_model, local_CNN_model, local_Transformer_model, client)
+    print("Saved local models")
 
+print("Done h12 f7")
     
 #h24 f7
 
@@ -157,17 +159,20 @@ for idx, client in enumerate(smart_meter_names):
        
     #compile and fit n rounds
     local_CNN_model = compile_fit(
-        local_LSTM_model,
+        local_CNN_model,
         windows_dict[client][3],
         MAX_EPOCHS
     )
     
     #Compile and fit n rounds
     local_Transformer_model = compile_fit(
-        local_LSTM_model,
+        local_Transformer_model,
         windows_dict[client][3],
         MAX_EPOCHS
     )
         
     #Save Transformer model
     saveLocalModels(cwd, local_LSTM_model, local_CNN_model, local_Transformer_model, client)
+    print("Saved local models")
+
+print("Done h24 f7")
