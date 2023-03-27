@@ -65,9 +65,9 @@ print("Created Data windows")
 
 #windows_dict[smart_meter_names][0-3] 
 #    -> 0:window_F5_H12 , 1:window_F5_H24 , 2:window_F7_H12 , 3:window_F7_H24
-forecasts_dict_LSTM_F5_H12 = {}
-forecasts_dict_CNN_F5_H12 = {}
-forecasts_dict_Transformer_F5_H12 = {}
+forecasts_dict_LSTM_F7_H12 = {}
+forecasts_dict_CNN_F7_H12 = {}
+forecasts_dict_Transformer_F7_H12 = {}
 
 for idx, client in enumerate(smart_meter_names):
     IPython.display.clear_output()
@@ -75,12 +75,12 @@ for idx, client in enumerate(smart_meter_names):
 
             #LSTM
     model_evaluation_test = loadCompileEvaluateModel(
-        path = cwd + f"/data/d05_models/local/{client}/Local_LSTM_F5_H12/Round100",
-        window = windows_dict[client][0], 
+        path = cwd + f"/data/d05_models/local/{client}/Local_LSTM_F7_H12/Round100",
+        window = windows_dict[client][2], 
         MAX_EPOCHS = MAX_EPOCHS
     )
     #Save
-    forecasts_dict_LSTM_F5_H12[client] = {
+    forecasts_dict_LSTM_F7_H12[client] = {
         'MSE':model_evaluation_test[0], 'RMSE':model_evaluation_test[1], 'MAPE':model_evaluation_test[2],
         'MAE':model_evaluation_test[3], 'Time':((timetaken.logs[-1][1]) / (timetaken.logs[-1][0]+1)) 
     }
@@ -88,12 +88,12 @@ for idx, client in enumerate(smart_meter_names):
     
     #CNN
     model_evaluation_test = loadCompileEvaluateModel(
-        path = cwd + f"/data/d05_models/local/{client}/Local_CNN_F5_H12/Round100",
-        window = windows_dict[client][0], 
+        path = cwd + f"/data/d05_models/local/{client}/Local_CNN_F7_H12/Round100",
+        window = windows_dict[client][2], 
         MAX_EPOCHS = MAX_EPOCHS
     )
     #Save
-    forecasts_dict_CNN_F5_H12[client] = {
+    forecasts_dict_CNN_F7_H12[client] = {
         'MSE':model_evaluation_test[0], 'RMSE':model_evaluation_test[1], 'MAPE':model_evaluation_test[2],
         'MAE':model_evaluation_test[3], 'Time':((timetaken.logs[-1][1]) / (timetaken.logs[-1][0]+1)) 
     }    
@@ -101,12 +101,12 @@ for idx, client in enumerate(smart_meter_names):
     
     #Transformer
     model_evaluation_test = loadCompileEvaluateModel(
-        path = cwd + f"/data/d05_models/local/{client}/Local_Transformer_F5_H12/Round100",
-        window = windows_dict[client][0], 
+        path = cwd + f"/data/d05_models/local/{client}/Local_Transformer_F7_H12/Round100",
+        window = windows_dict[client][2], 
         MAX_EPOCHS = MAX_EPOCHS
     )
     #Save
-    forecasts_dict_Transformer_F5_H12[client] = {
+    forecasts_dict_Transformer_F7_H12[client] = {
         'MSE':model_evaluation_test[0], 'RMSE':model_evaluation_test[1], 'MAPE':model_evaluation_test[2],
         'MAE':model_evaluation_test[3], 'Time':((timetaken.logs[-1][1]) / (timetaken.logs[-1][0]+1)) 
     }
@@ -114,21 +114,23 @@ for idx, client in enumerate(smart_meter_names):
 
 #Inintialize result dictionary
 final_dict = InititalizeResultDictionary(learning_style="Local")
-final_dict['Local']['LSTM']['H12']['F5'] = forecasts_dict_LSTM_F5_H12
-final_dict['Local']['CNN']['H12']['F5'] = forecasts_dict_CNN_F5_H12
-final_dict['Local']['Transformer']['H12']['F5'] = forecasts_dict_Transformer_F5_H12
+final_dict['Local']['LSTM']['H12']['F7'] = forecasts_dict_LSTM_F7_H12
+final_dict['Local']['CNN']['H12']['F7'] = forecasts_dict_CNN_F7_H12
+final_dict['Local']['Transformer']['H12']['F7'] = forecasts_dict_Transformer_F7_H12
 
-with open(cwd + '/results/Local_results_H12_F5.pkl', 'wb') as f:
+with open(cwd + '/results/Local_results_H12_F7.pkl', 'wb') as f:
     pickle.dump(final_dict, f)
 
-print("Done - saved h12 f5")
+print("Done - saved h12 f7")
+
+
 #f5 h24
 
 #windows_dict[smart_meter_names][0-3] 
 #    -> 0:window_F5_H12 , 1:window_F5_H24 , 2:window_F7_H12 , 3:window_F7_H24
-forecasts_dict_LSTM_F5_H24 = {}
-forecasts_dict_CNN_F5_H24 = {}
-forecasts_dict_Transformer_F5_H24 = {}
+forecasts_dict_LSTM_F7_H24 = {}
+forecasts_dict_CNN_F7_H24 = {}
+forecasts_dict_Transformer_F7_H24 = {}
 
 for idx, client in enumerate(smart_meter_names):
     IPython.display.clear_output()
@@ -136,12 +138,12 @@ for idx, client in enumerate(smart_meter_names):
 
             #LSTM
     model_evaluation_test = loadCompileEvaluateModel(
-        path = cwd + f"/data/d05_models/local/{client}/Local_LSTM_F5_H24/Round100",
-        window = windows_dict[client][1], 
+        path = cwd + f"/data/d05_models/local/{client}/Local_LSTM_F7_H24/Round100",
+        window = windows_dict[client][3], 
         MAX_EPOCHS = MAX_EPOCHS
     )
     #Save
-    forecasts_dict_LSTM_F5_H24[client] = {
+    forecasts_dict_LSTM_F7_H24[client] = {
         'MSE':model_evaluation_test[0], 'RMSE':model_evaluation_test[1], 'MAPE':model_evaluation_test[2],
         'MAE':model_evaluation_test[3], 'Time':((timetaken.logs[-1][1]) / (timetaken.logs[-1][0]+1)) 
     }
@@ -149,12 +151,12 @@ for idx, client in enumerate(smart_meter_names):
     
     #CNN
     model_evaluation_test = loadCompileEvaluateModel(
-        path = cwd + f"/data/d05_models/local/{client}/Local_CNN_F5_H24/Round100",
-        window = windows_dict[client][1], 
+        path = cwd + f"/data/d05_models/local/{client}/Local_CNN_F7_H24/Round100",
+        window = windows_dict[client][3], 
         MAX_EPOCHS = MAX_EPOCHS
     )
     #Save
-    forecasts_dict_CNN_F5_H24[client] = {
+    forecasts_dict_CNN_F7_H24[client] = {
         'MSE':model_evaluation_test[0], 'RMSE':model_evaluation_test[1], 'MAPE':model_evaluation_test[2],
         'MAE':model_evaluation_test[3], 'Time':((timetaken.logs[-1][1]) / (timetaken.logs[-1][0]+1)) 
     }    
@@ -162,12 +164,12 @@ for idx, client in enumerate(smart_meter_names):
     
     #Transformer
     model_evaluation_test = loadCompileEvaluateModel(
-        path = cwd + f"/data/d05_models/local/{client}/Local_Transformer_F5_H24/Round100",
-        window = windows_dict[client][1], 
+        path = cwd + f"/data/d05_models/local/{client}/Local_Transformer_F7_H24/Round100",
+        window = windows_dict[client][3], 
         MAX_EPOCHS = MAX_EPOCHS
     )
     #Save
-    forecasts_dict_Transformer_F5_H24[client] = {
+    forecasts_dict_Transformer_F7_H24[client] = {
         'MSE':model_evaluation_test[0], 'RMSE':model_evaluation_test[1], 'MAPE':model_evaluation_test[2],
         'MAE':model_evaluation_test[3], 'Time':((timetaken.logs[-1][1]) / (timetaken.logs[-1][0]+1)) 
     }
@@ -175,11 +177,11 @@ for idx, client in enumerate(smart_meter_names):
 
 #Inintialize result dictionary
 final_dict = InititalizeResultDictionary(learning_style="Local")
-final_dict['Local']['LSTM']['H24']['F5'] = forecasts_dict_LSTM_F5_H24
-final_dict['Local']['CNN']['H24']['F5'] = forecasts_dict_CNN_F5_H24
-final_dict['Local']['Transformer']['H24']['F5'] = forecasts_dict_Transformer_F5_H24
+final_dict['Local']['LSTM']['H24']['F7'] = forecasts_dict_LSTM_F7_H24
+final_dict['Local']['CNN']['H24']['F7'] = forecasts_dict_CNN_F7_H24
+final_dict['Local']['Transformer']['H24']['F7'] = forecasts_dict_Transformer_F7_H24
 
-with open(cwd + '/results/Local_results_H24_F5.pkl', 'wb') as f:
+with open(cwd + '/results/Local_results_H24_F7.pkl', 'wb') as f:
     pickle.dump(final_dict, f)
 
-print("Done - saved h24 f5")
+print("Done - saved h24 f7")
