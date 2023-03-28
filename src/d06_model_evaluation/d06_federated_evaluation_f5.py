@@ -36,7 +36,6 @@ from windowgenerator import *
 from evaluation_helper_functions import *
 
 
-
 # Hyperparameter
 OUT_STEPS = [12, 24] #Next 12 or 24 hours
 INPUT_STEPS = 24
