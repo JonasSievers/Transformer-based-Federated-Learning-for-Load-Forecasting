@@ -17,7 +17,7 @@ def loadCompileEvaluateModel(path, window, MAX_EPOCHS):
     
     :param: model path and window
     """           
-    model = tf.keras.models.load_model(path)
+    model = tf.keras.models.load_model(path, compile=False)
     model.compile(
         loss=tf.keras.losses.MeanSquaredError(),
         optimizer=tf.keras.optimizers.Adam(),

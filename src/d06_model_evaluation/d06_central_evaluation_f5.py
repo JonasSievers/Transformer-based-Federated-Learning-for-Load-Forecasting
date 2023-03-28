@@ -8,10 +8,10 @@ from datetime import timedelta
 import tensorflow as tf
 #Keras: Open-Source deep-learning library 
 import os
-#Clear output after training
-import IPython.display
+
 # pickle to save dictionary in file
 import pickle 
+
 import sys
 # caution: path[0] is reserved for script path (or '' in REPL)
 cwd = os.path.normpath(os.getcwd())
@@ -86,7 +86,6 @@ tf.random.set_seed(42)
 forecasts_dict_LSTM_F5_H12 = {}
 forecasts_dict_CNN_F5_H12 = {}
 forecasts_dict_Transformer_F5_H12 = {}
-
 
 #LSTM
 model_evaluation_test = loadCompileEvaluateModel(
