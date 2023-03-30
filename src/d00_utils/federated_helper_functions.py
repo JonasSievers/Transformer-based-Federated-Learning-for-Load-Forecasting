@@ -243,7 +243,7 @@ def initiallySaveAllGlobalModelsN9(cwd, global_LSTM_models, global_CNN_models, g
     :param: current working directory,  models
     """
         
-    for cluster_idx in range(6):
+    for cluster_idx in range(9):
         # LSTM
         global_LSTM_models[cluster_idx].save(cwd + f"/data/d05_models/N9/cluster{cluster_idx}/{global_LSTM_models[cluster_idx].name}/FederatedRound{0}")
         #Cnn
