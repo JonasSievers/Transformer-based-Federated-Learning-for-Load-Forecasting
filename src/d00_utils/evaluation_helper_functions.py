@@ -43,3 +43,37 @@ def loadCompileEvaluateModel(path, window, MAX_EPOCHS):
     
     model_evaluation_test = model.evaluate(window.test)
     return model_evaluation_test
+
+def loadCompileEvaluateModelN9(path, window, MAX_EPOCHS, client):
+    """
+    load model, compile and evaluate on test window  
+    
+    :param: model path and window
+    """           
+    model = tf.keras.models.load_model(path, compile=False)
+    model.compile(
+        loss=tf.keras.losses.MeanSquaredError(),
+        optimizer=tf.keras.optimizers.Adam(),
+        metrics=[tf.keras.metrics.RootMeanSquaredError(), 
+            tf.keras.metrics.MeanAbsolutePercentageError(),
+            tf.keras.metrics.MeanAbsoluteError(),
+        ]
+    )
+    
+    #fit local model with client's data
+    early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss',patience=5,mode='min')
+    model.fit(
+        window.train, 
+        epochs=MAX_EPOCHS, 
+        verbose=1, 
+        validation_data=window.val,
+        callbacks=[
+            timetaken,
+            early_stopping, 
+            create_model_checkpoint(save_path = cwd + f"/data/d05_models/N9/FineTune/{model.name}/{client}"), 
+        ]
+    )
+    model = tf.keras.models.load_model(cwd + f"/data/d05_models/N9/FineTune/{model.name}/{client}")
+
+    model_evaluation_test = model.evaluate(window.test)
+    return model_evaluation_test
