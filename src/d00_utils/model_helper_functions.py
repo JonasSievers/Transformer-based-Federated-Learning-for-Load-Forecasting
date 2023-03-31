@@ -226,9 +226,9 @@ def createDataWindows(y, smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict, N_C
             input_width=INPUT_STEPS, label_width=OUT_STEPS[0], shift=OUT_STEPS[0], 
             train_df = ds_dict[client][3], val_df = ds_dict[client][4], test_df = ds_dict[client][5], label_columns=[client]
         )
-        example_window = tf.stack([np.array(ds_dict[client][3][10100:10100+window_F5_H12.total_window_size]),
-                                   np.array(ds_dict[client][3][2000:2000+window_F5_H12.total_window_size]),
-                                   np.array(ds_dict[client][3][3000:3000+window_F5_H12.total_window_size])])
+        example_window = tf.stack([np.array(ds_dict[client][3][100:100+window_F5_H12.total_window_size]),
+                                   np.array(ds_dict[client][3][300:300+window_F5_H12.total_window_size]),
+                                   np.array(ds_dict[client][3][500:500+window_F5_H12.total_window_size])])
         example_inputs, example_labels = window_F5_H12.split_window(example_window)
         window_F5_H12.example = example_inputs, example_labels
 
@@ -237,9 +237,9 @@ def createDataWindows(y, smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict, N_C
             input_width=INPUT_STEPS, label_width=OUT_STEPS[1], shift=OUT_STEPS[1], 
             train_df = ds_dict[client][3], val_df = ds_dict[client][4], test_df = ds_dict[client][5], label_columns=[client]
         )
-        example_window = tf.stack([np.array(ds_dict[client][3][10100:10100+window_F5_H24.total_window_size]),
-                                   np.array(ds_dict[client][3][2000:2000+window_F5_H24.total_window_size]),
-                                   np.array(ds_dict[client][3][3000:3000+window_F5_H24.total_window_size])])
+        example_window = tf.stack([np.array(ds_dict[client][3][100:100+window_F5_H24.total_window_size]),
+                                   np.array(ds_dict[client][3][300:300+window_F5_H24.total_window_size]),
+                                   np.array(ds_dict[client][3][500:500+window_F5_H24.total_window_size])])
         example_inputs, example_labels = window_F5_H24.split_window(example_window)
         window_F5_H24.example = example_inputs, example_labels
 
@@ -248,9 +248,9 @@ def createDataWindows(y, smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict, N_C
             input_width=INPUT_STEPS, label_width=OUT_STEPS[0], shift=OUT_STEPS[0], 
             train_df = ds_dict[client][0], val_df = ds_dict[client][1], test_df = ds_dict[client][2], label_columns=[client]
         )
-        example_window = tf.stack([np.array(ds_dict[client][0][10100:10100+window_F7_H12.total_window_size]),
-                                   np.array(ds_dict[client][0][2000:2000+window_F7_H12.total_window_size]),
-                                   np.array(ds_dict[client][0][3000:3000+window_F7_H12.total_window_size])])
+        example_window = tf.stack([np.array(ds_dict[client][0][100:100+window_F7_H12.total_window_size]),
+                                   np.array(ds_dict[client][0][300:300+window_F7_H12.total_window_size]),
+                                   np.array(ds_dict[client][0][500:500+window_F7_H12.total_window_size])])
         example_inputs, example_labels = window_F7_H12.split_window(example_window)
         window_F7_H12.example = example_inputs, example_labels
 
@@ -259,9 +259,9 @@ def createDataWindows(y, smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict, N_C
             input_width=INPUT_STEPS, label_width=OUT_STEPS[1], shift=OUT_STEPS[1], 
             train_df = ds_dict[client][0], val_df = ds_dict[client][1], test_df = ds_dict[client][2], label_columns=[client]
         )
-        example_window = tf.stack([np.array(ds_dict[client][0][10100:10100+window_F7_H24.total_window_size]),
-                                   np.array(ds_dict[client][0][2000:2000+window_F7_H24.total_window_size]),
-                                   np.array(ds_dict[client][0][3000:3000+window_F7_H24.total_window_size])])
+        example_window = tf.stack([np.array(ds_dict[client][0][100:100+window_F7_H24.total_window_size]),
+                                   np.array(ds_dict[client][0][300:300+window_F7_H24.total_window_size]),
+                                   np.array(ds_dict[client][0][500:500+window_F7_H24.total_window_size])])
         example_inputs, example_labels = window_F7_H24.split_window(example_window)
         window_F7_H24.example = example_inputs, example_labels
 

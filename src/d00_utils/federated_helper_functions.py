@@ -170,6 +170,24 @@ def compile_fit_set_weights(local_model, global_weights, window, client, client_
     
     return scaled_weights
     
+def loadGlobalModelsGeneral( cwd, addPath, global_LSTM_models, global_CNN_models, global_Transformer_models, idx, idx_com):
+    """
+    load the global model of the last federated training round. If called in federated round 0, then the initial global model is retuned
+    
+    :param: path, global models, cluster index, index of federated round
+    :return: global models
+    """
+        
+    #load global model of last federated round if not first round
+    if idx_com != 0:
+        idx_com = idx_com-1
+        
+    #load model
+    global_LSTM_model = keras.models.load_model(cwd + f"/data/d05_models/{addPath}/cluster{idx}/{global_LSTM_models[idx].name}/FederatedRound{idx_com}", compile=False)
+    global_CNN_model = keras.models.load_model(cwd + f"/data/d05_models/{addPath}/cluster{idx}/{global_CNN_models[idx].name}/FederatedRound{idx_com}", compile=False)
+    global_Transformer_model = keras.models.load_model(cwd + f"/data/d05_models/{addPath}/cluster{idx}/{global_Transformer_models[idx].name}/FederatedRound{idx_com}", compile=False)
+    
+    return global_LSTM_model, global_CNN_model, global_Transformer_model
 
 def loadGlobalModels( cwd, global_LSTM_models, global_CNN_models, global_Transformer_models, idx, idx_com):
     """
@@ -189,6 +207,7 @@ def loadGlobalModels( cwd, global_LSTM_models, global_CNN_models, global_Transfo
     global_Transformer_model = keras.models.load_model(cwd + f"/data/d05_models/cluster{idx}/{global_Transformer_models[idx].name}/FederatedRound{idx_com}", compile=False)
     
     return global_LSTM_model, global_CNN_model, global_Transformer_model
+
     
 def getGlobalModelWeights(global_LSTM_model, global_CNN_model, global_Transformer_model):
     """
@@ -202,6 +221,22 @@ def getGlobalModelWeights(global_LSTM_model, global_CNN_model, global_Transforme
     return global_LSTM_weights, global_CNN_weights, global_Transformer_weights
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------Change clusters
+def initiallySaveAllGlobalModelsGeneral(cwd, addPath, global_LSTM_models, global_CNN_models, global_Transformer_models):
+    """
+    Saves the initial global models in file /data/d05_models/cluser{i}/MODELNAME/FederatedRound{i}
+    
+    :param: current working directory,  models
+    """
+        
+    for cluster_idx in range(6):
+        # LSTM
+        global_LSTM_models[cluster_idx].save(cwd + f"/data/d05_models/{addPath}/cluster{cluster_idx}/{global_LSTM_models[cluster_idx].name}/FederatedRound{0}")
+        #Cnn
+        global_CNN_models[cluster_idx].save(cwd + f"/data/d05_models/{addPath}/cluster{cluster_idx}/{global_CNN_models[cluster_idx].name}/FederatedRound{0}")
+        #Transformer
+        global_Transformer_models[cluster_idx].save(cwd + f"/data/d05_models/{addPath}/cluster{cluster_idx}/{global_Transformer_models[cluster_idx].name}/FederatedRound{0}")
+
+
 def initiallySaveAllGlobalModels(cwd, global_LSTM_models, global_CNN_models, global_Transformer_models):
     """
     Saves the initial global models in file /data/d05_models/cluser{i}/MODELNAME/FederatedRound{i}
@@ -284,6 +319,19 @@ def initiallySaveAllGlobalModelsN9(cwd, global_LSTM_models, global_CNN_models, g
         global_CNN_models[cluster_idx].save(cwd + f"/data/d05_models/N9/cluster{cluster_idx}/{global_CNN_models[cluster_idx].name}/FederatedRound{0}")
         #Transformer
         global_Transformer_models[cluster_idx].save(cwd + f"/data/d05_models/N9/cluster{cluster_idx}/{global_Transformer_models[cluster_idx].name}/FederatedRound{0}")
+
+def saveGlobalModelsGeneral(cwd, addPath, global_LSTM_model, global_CNN_model, global_Transformer_model, idx, idx_com):
+    """
+    Save the global models  
+    
+    :param: global models, cluster idx und federated round idx
+    """
+    # LSTM
+    global_LSTM_model.save(cwd + f"/data/d05_models/{addPath}/cluster{idx}/{global_LSTM_model.name}/FederatedRound{idx_com}")
+    #Cnn
+    global_CNN_model.save(cwd + f"/data/d05_models/{addPath}/cluster{idx}/{global_CNN_model.name}/FederatedRound{idx_com}")
+    #Transformer
+    global_Transformer_model.save(cwd + f"/data/d05_models/{addPath}/cluster{idx}/{global_Transformer_model.name}/FederatedRound{idx_com}")
 
 def saveGlobalModels(cwd, global_LSTM_model, global_CNN_model, global_Transformer_model, idx, idx_com):
     """
