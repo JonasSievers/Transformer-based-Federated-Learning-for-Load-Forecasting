@@ -34,9 +34,9 @@ def createLocalDataWindows(smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict):
             input_width=INPUT_STEPS, label_width=OUT_STEPS[0], shift=OUT_STEPS[0], 
             train_df = ds_dict[client][3], val_df = ds_dict[client][4], test_df = ds_dict[client][5], label_columns=[client]
         )
-        example_window = tf.stack([np.array(ds_dict[client][3][10100:10100+window_F5_H12.total_window_size]),
-                                   np.array(ds_dict[client][3][2000:2000+window_F5_H12.total_window_size]),
-                                   np.array(ds_dict[client][3][3000:3000+window_F5_H12.total_window_size])])
+        example_window = tf.stack([np.array(ds_dict[client][3][100:100+window_F5_H12.total_window_size]),
+                                   np.array(ds_dict[client][3][200:200+window_F5_H12.total_window_size]),
+                                   np.array(ds_dict[client][3][300:300+window_F5_H12.total_window_size])])
         example_inputs, example_labels = window_F5_H12.split_window(example_window)
         window_F5_H12.example = example_inputs, example_labels
 
@@ -45,9 +45,9 @@ def createLocalDataWindows(smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict):
             input_width=INPUT_STEPS, label_width=OUT_STEPS[1], shift=OUT_STEPS[1], 
             train_df = ds_dict[client][3], val_df = ds_dict[client][4], test_df = ds_dict[client][5], label_columns=[client]
         )
-        example_window = tf.stack([np.array(ds_dict[client][3][10100:10100+window_F5_H24.total_window_size]),
-                                   np.array(ds_dict[client][3][2000:2000+window_F5_H24.total_window_size]),
-                                   np.array(ds_dict[client][3][3000:3000+window_F5_H24.total_window_size])])
+        example_window = tf.stack([np.array(ds_dict[client][3][100:100+window_F5_H24.total_window_size]),
+                                   np.array(ds_dict[client][3][200:200+window_F5_H24.total_window_size]),
+                                   np.array(ds_dict[client][3][300:300+window_F5_H24.total_window_size])])
         example_inputs, example_labels = window_F5_H24.split_window(example_window)
         window_F5_H24.example = example_inputs, example_labels
 
@@ -56,9 +56,9 @@ def createLocalDataWindows(smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict):
             input_width=INPUT_STEPS, label_width=OUT_STEPS[0], shift=OUT_STEPS[0], 
             train_df = ds_dict[client][0], val_df = ds_dict[client][1], test_df = ds_dict[client][2], label_columns=[client]
         )
-        example_window = tf.stack([np.array(ds_dict[client][0][10100:10100+window_F7_H12.total_window_size]),
-                                   np.array(ds_dict[client][0][2000:2000+window_F7_H12.total_window_size]),
-                                   np.array(ds_dict[client][0][3000:3000+window_F7_H12.total_window_size])])
+        example_window = tf.stack([np.array(ds_dict[client][0][100:100+window_F7_H12.total_window_size]),
+                                   np.array(ds_dict[client][0][200:200+window_F7_H12.total_window_size]),
+                                   np.array(ds_dict[client][0][300:300+window_F7_H12.total_window_size])])
         example_inputs, example_labels = window_F7_H12.split_window(example_window)
         window_F7_H12.example = example_inputs, example_labels
 
@@ -67,9 +67,9 @@ def createLocalDataWindows(smart_meter_names, INPUT_STEPS, OUT_STEPS, ds_dict):
             input_width=INPUT_STEPS, label_width=OUT_STEPS[1], shift=OUT_STEPS[1], 
             train_df = ds_dict[client][0], val_df = ds_dict[client][1], test_df = ds_dict[client][2], label_columns=[client]
         )
-        example_window = tf.stack([np.array(ds_dict[client][0][10100:10100+window_F7_H24.total_window_size]),
-                                   np.array(ds_dict[client][0][2000:2000+window_F7_H24.total_window_size]),
-                                   np.array(ds_dict[client][0][3000:3000+window_F7_H24.total_window_size])])
+        example_window = tf.stack([np.array(ds_dict[client][0][100:100+window_F7_H24.total_window_size]),
+                                   np.array(ds_dict[client][0][200:200+window_F7_H24.total_window_size]),
+                                   np.array(ds_dict[client][0][300:300+window_F7_H24.total_window_size])])
         example_inputs, example_labels = window_F7_H24.split_window(example_window)
         window_F7_H24.example = example_inputs, example_labels
 
@@ -146,6 +146,22 @@ def initiallySaveAllLocalModels(cwd, smart_meter_names, local_LSTM_models, local
         #Transformer
         local_Transformer_models[idx].save(cwd + f"/data/d05_models/local/{client}/{local_Transformer_models[idx].name}/Round{0}")
 
+def initiallySaveAllLocalModelsGeneral(cwd, addPath, smart_meter_names, local_LSTM_models, local_CNN_models, local_Transformer_models):
+    """
+    Saves the initial local models in file /data/d05_models/cluser{i}/MODELNAME/FederatedRound{i}
+    
+    :param: current working directory,  models
+    """
+        
+    for idx, client in enumerate(smart_meter_names):
+        # LSTM
+        local_LSTM_models[idx].save(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_LSTM_models[idx].name}/Round{0}")
+        #Cnn
+        local_CNN_models[idx].save(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_CNN_models[idx].name}/Round{0}")
+        #Transformer
+        local_Transformer_models[idx].save(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_Transformer_models[idx].name}/Round{0}")
+
+
 def loadLocalModels( cwd, local_LSTM_models, local_CNN_models, local_Transformer_models, idx, client):
     """
     load the local model of the last federated training round. If called in federated round 0, then the initial local model is retuned
@@ -158,6 +174,21 @@ def loadLocalModels( cwd, local_LSTM_models, local_CNN_models, local_Transformer
     local_LSTM_model = keras.models.load_model(cwd + f"/data/d05_models/local/{client}/{local_LSTM_models[idx].name}/Round{0}", compile=False)
     local_CNN_model = keras.models.load_model(cwd + f"/data/d05_models/local/{client}/{local_CNN_models[idx].name}/Round{0}", compile=False)
     local_Transformer_model = keras.models.load_model(cwd + f"/data/d05_models/local/{client}/{local_Transformer_models[idx].name}/Round{0}", compile=False)
+    
+    return local_LSTM_model, local_CNN_model, local_Transformer_model
+
+def loadLocalModelsGeneral( cwd, addPath, local_LSTM_models, local_CNN_models, local_Transformer_models, idx, client):
+    """
+    load the local model of the last federated training round. If called in federated round 0, then the initial local model is retuned
+    
+    :param: path, local models, cluster index, index of federated round
+    :return: local models
+    """
+               
+    #load initial model
+    local_LSTM_model = keras.models.load_model(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_LSTM_models[idx].name}/Round{0}", compile=False)
+    local_CNN_model = keras.models.load_model(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_CNN_models[idx].name}/Round{0}", compile=False)
+    local_Transformer_model = keras.models.load_model(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_Transformer_models[idx].name}/Round{0}", compile=False)
     
     return local_LSTM_model, local_CNN_model, local_Transformer_model
 
@@ -206,3 +237,16 @@ def saveLocalModels(cwd, local_LSTM_model, local_CNN_model, local_Transformer_mo
     local_CNN_model.save(cwd + f"/data/d05_models/local/{client}/{local_CNN_model.name}/Round{100}")
     #Transformer
     local_Transformer_model.save(cwd + f"/data/d05_models/local/{client}/{local_Transformer_model.name}/Round{100}")
+
+def saveLocalModelsGeneral(cwd, addPath, local_LSTM_model, local_CNN_model, local_Transformer_model, client):
+    """
+    Save the Local models  
+    
+    :param: local models, cluster idx und federated round idx
+    """
+    # LSTM
+    local_LSTM_model.save(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_LSTM_model.name}/Round{100}")
+    #Cnn
+    local_CNN_model.save(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_CNN_model.name}/Round{100}")
+    #Transformer
+    local_Transformer_model.save(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_Transformer_model.name}/Round{100}")
