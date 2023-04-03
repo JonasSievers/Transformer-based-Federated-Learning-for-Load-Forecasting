@@ -162,6 +162,21 @@ def initiallySaveAllLocalModelsGeneral(cwd, addPath, smart_meter_names, local_LS
         local_Transformer_models[idx].save(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_Transformer_models[idx].name}/Round{0}")
 
 
+def initiallySaveAllLocalModelsW168(cwd, smart_meter_names, local_LSTM_models, local_CNN_models, local_Transformer_models):
+    """
+    Saves the initial local models in file /data/d05_models/cluser{i}/MODELNAME/FederatedRound{i}
+    
+    :param: current working directory,  models
+    """
+        
+    for idx, client in enumerate(smart_meter_names):
+        # LSTM
+        local_LSTM_models[idx].save(cwd + f"/data/d05_models/local/W168/{client}/{local_LSTM_models[idx].name}/Round{0}")
+        #Cnn
+        local_CNN_models[idx].save(cwd + f"/data/d05_models/local/W168/{client}/{local_CNN_models[idx].name}/Round{0}")
+        #Transformer
+        local_Transformer_models[idx].save(cwd + f"/data/d05_models/local/W168/{client}/{local_Transformer_models[idx].name}/Round{0}")
+
 def loadLocalModels( cwd, local_LSTM_models, local_CNN_models, local_Transformer_models, idx, client):
     """
     load the local model of the last federated training round. If called in federated round 0, then the initial local model is retuned
@@ -174,21 +189,6 @@ def loadLocalModels( cwd, local_LSTM_models, local_CNN_models, local_Transformer
     local_LSTM_model = keras.models.load_model(cwd + f"/data/d05_models/local/{client}/{local_LSTM_models[idx].name}/Round{0}", compile=False)
     local_CNN_model = keras.models.load_model(cwd + f"/data/d05_models/local/{client}/{local_CNN_models[idx].name}/Round{0}", compile=False)
     local_Transformer_model = keras.models.load_model(cwd + f"/data/d05_models/local/{client}/{local_Transformer_models[idx].name}/Round{0}", compile=False)
-    
-    return local_LSTM_model, local_CNN_model, local_Transformer_model
-
-def loadLocalModelsGeneral( cwd, addPath, local_LSTM_models, local_CNN_models, local_Transformer_models, idx, client):
-    """
-    load the local model of the last federated training round. If called in federated round 0, then the initial local model is retuned
-    
-    :param: path, local models, cluster index, index of federated round
-    :return: local models
-    """
-               
-    #load initial model
-    local_LSTM_model = keras.models.load_model(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_LSTM_models[idx].name}/Round{0}", compile=False)
-    local_CNN_model = keras.models.load_model(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_CNN_models[idx].name}/Round{0}", compile=False)
-    local_Transformer_model = keras.models.load_model(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_Transformer_models[idx].name}/Round{0}", compile=False)
     
     return local_LSTM_model, local_CNN_model, local_Transformer_model
 
@@ -237,16 +237,3 @@ def saveLocalModels(cwd, local_LSTM_model, local_CNN_model, local_Transformer_mo
     local_CNN_model.save(cwd + f"/data/d05_models/local/{client}/{local_CNN_model.name}/Round{100}")
     #Transformer
     local_Transformer_model.save(cwd + f"/data/d05_models/local/{client}/{local_Transformer_model.name}/Round{100}")
-
-def saveLocalModelsGeneral(cwd, addPath, local_LSTM_model, local_CNN_model, local_Transformer_model, client):
-    """
-    Save the Local models  
-    
-    :param: local models, cluster idx und federated round idx
-    """
-    # LSTM
-    local_LSTM_model.save(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_LSTM_model.name}/Round{100}")
-    #Cnn
-    local_CNN_model.save(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_CNN_model.name}/Round{100}")
-    #Transformer
-    local_Transformer_model.save(cwd + f"/data/d05_models/{addPath}/local/{client}/{local_Transformer_model.name}/Round{100}")
