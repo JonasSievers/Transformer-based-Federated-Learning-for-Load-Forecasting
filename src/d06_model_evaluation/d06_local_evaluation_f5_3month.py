@@ -28,14 +28,14 @@ from evaluation_helper_functions import *
 OUT_STEPS = [12, 24] #Next 12 or 24 hours
 INPUT_STEPS = 24
 #Training epochs
-MAX_EPOCHS = 100
+MAX_EPOCHS = 1
 
 #Data Analytics
 print("Get data")
 # get current working directory and go back one folder to main working directory
 cwd = os.path.normpath(os.getcwd())
 #Read CSV file to pandas dataframe; encoding= 'unicode_escape': Decode from Latin-1 source code. Default UTF-8.
-df = pd.read_csv(cwd+'/data/d03_data_processed/d03_data_processed_3month.csv', encoding= 'unicode_escape', index_col='Date')
+df = pd.read_csv(cwd+'/data/d03_data_processed/d03_data_processed.csv', encoding= 'unicode_escape', index_col='Date')
 #Display smart meter names and amount
 smart_meter_names = df.columns[2:-4]
 print("Selected clients: ", len(smart_meter_names))
@@ -105,7 +105,7 @@ final_dict['Local']['LSTM']['H12']['F5'] = forecasts_dict_LSTM_F5_H12
 final_dict['Local']['CNN']['H12']['F5'] = forecasts_dict_CNN_F5_H12
 final_dict['Local']['Transformer']['H12']['F5'] = forecasts_dict_Transformer_F5_H12
 
-with open(cwd + '/results/Local_results_H12_F5_3month.pkl', 'wb') as f:
+with open(cwd + '/results/Local_results_H12_F5_3month_1y.pkl', 'wb') as f:
     pickle.dump(final_dict, f)
 
 print("Done - saved h12 f5")
@@ -166,7 +166,7 @@ final_dict['Local']['LSTM']['H24']['F5'] = forecasts_dict_LSTM_F5_H24
 final_dict['Local']['CNN']['H24']['F5'] = forecasts_dict_CNN_F5_H24
 final_dict['Local']['Transformer']['H24']['F5'] = forecasts_dict_Transformer_F5_H24
 
-with open(cwd + '/results/Local_results_H24_F5_3month.pkl', 'wb') as f:
+with open(cwd + '/results/Local_results_H24_F5_3month_1y.pkl', 'wb') as f:
     pickle.dump(final_dict, f)
 
 print("Done - saved h24 f5")
