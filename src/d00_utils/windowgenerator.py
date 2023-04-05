@@ -19,9 +19,9 @@ import tensorflow as tf
 #Keras: Open-Source deep-learning library 
 from tensorflow import keras
 #Building blocks of NN in Keras
-from tensorflow.keras import layers
+from keras import layers
 #EarlyStop to stop training early
-from tensorflow.keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping
 #Functional API: Layers for different models
 from keras.layers import Dense, LSTM, Dropout
 #Normalization
