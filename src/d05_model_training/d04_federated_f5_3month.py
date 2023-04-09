@@ -96,7 +96,7 @@ print("Created Data windows")
 #Select smallest cluster only for testing
 #windows_dict = {k: v for k, v in windows_dict.items() if k == 4}
 #print(windows_dict)
-"""
+
 # Federated Learning
 # Set random seed for as reproducible results as possible
 tf.random.set_seed(42)
@@ -208,7 +208,7 @@ for idx_com, comm_round in enumerate(range(comms_round)):
         #Save global models
         saveGlobalModelsGeneral(cwd, '3month', global_LSTM_models[idx], global_CNN_models[idx], global_Transformer_models[idx], idx, idx_com)
         print("Saved Global models")
-"""
+
 
 #h24
 #Create Global models

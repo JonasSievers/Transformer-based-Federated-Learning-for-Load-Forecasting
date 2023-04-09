@@ -47,7 +47,7 @@ print("Get data")
 # get current working directory and go back one folder to main working directory
 cwd = os.path.normpath(os.getcwd())
 #Read CSV file to pandas dataframe; encoding= 'unicode_escape': Decode from Latin-1 source code. Default UTF-8.
-df = pd.read_csv(cwd+'/data/d03_data_processed/d03_data_processed_3month.csv', encoding= 'unicode_escape', index_col='Date')
+df = pd.read_csv(cwd+'/data/d03_data_processed/d03_data_processed.csv', encoding= 'unicode_escape', index_col='Date')
 #Display smart meter names and amount
 smart_meter_names = df.columns[2:-4]
 print("Selected clients: ", len(smart_meter_names))
